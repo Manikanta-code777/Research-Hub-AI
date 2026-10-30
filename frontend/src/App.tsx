@@ -31,6 +31,7 @@ export default function App() {
         <Routes>
           {/* Public */}
           <Route path="/"         element={<Home />} />
+          <Route path="/home"     element={<Home />} />
           <Route path="/login"           element={<Login />} />
           <Route path="/register"        element={<Register />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />

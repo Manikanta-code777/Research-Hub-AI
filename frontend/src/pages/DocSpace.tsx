@@ -1,7 +1,8 @@
 import { useState, useRef, useCallback } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, FileText, Save, Loader2, Eye, Edit3, Download,
-         Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Code, Minus } from 'lucide-react';
+         Bold, Italic, Heading1, Heading2, Heading3, List, ListOrdered, Quote, Code, Minus,
+         AlignLeft, AlignCenter, AlignRight, AlignJustify, Palette } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import {
@@ -28,10 +29,28 @@ const TOOLBAR: (ToolbarAction | 'sep')[] = [
   { icon: Italic,       label: 'Italic',         prefix: '_',  suffix: '_'  },
   { icon: Code,         label: 'Inline code',    prefix: '`',  suffix: '`'  },
   'sep',
+  { icon: AlignLeft,    label: 'Align Left',     prefix: '<div style="text-align: left">', suffix: '</div>' },
+  { icon: AlignCenter,  label: 'Align Center',   prefix: '<div style="text-align: center">', suffix: '</div>' },
+  { icon: AlignRight,   label: 'Align Right',    prefix: '<div style="text-align: right">', suffix: '</div>' },
+  { icon: AlignJustify, label: 'Align Justify',  prefix: '<div style="text-align: justify">', suffix: '</div>' },
+  'sep',
   { icon: List,         label: 'Bullet list',    prefix: '- ', block: true },
   { icon: ListOrdered,  label: 'Numbered list',  prefix: '1. ', block: true },
   { icon: Quote,        label: 'Blockquote',     prefix: '> ', block: true },
   { icon: Minus,        label: 'Divider',        prefix: '\n---\n', block: true },
+];
+
+const COLORS = [
+  { name: 'Red', hex: '#ef4444', class: 'bg-red-500' },
+  { name: 'Orange', hex: '#f97316', class: 'bg-orange-500' },
+  { name: 'Amber', hex: '#f59e0b', class: 'bg-amber-500' },
+  { name: 'Green', hex: '#22c55e', class: 'bg-green-500' },
+  { name: 'Teal', hex: '#14b8a6', class: 'bg-teal-500' },
+  { name: 'Blue', hex: '#3b82f6', class: 'bg-blue-500' },
+  { name: 'Indigo', hex: '#6366f1', class: 'bg-indigo-500' },
+  { name: 'Purple', hex: '#a855f7', class: 'bg-purple-500' },
+  { name: 'Pink', hex: '#ec4899', class: 'bg-pink-500' },
+  { name: 'Gray', hex: '#6b7280', class: 'bg-gray-500' },
 ];
 
 export default function DocSpace() {
@@ -47,6 +66,7 @@ export default function DocSpace() {
   const [creating, setCreating] = useState(false);
   const [newTitle, setNewTitle] = useState('');
   const [newType, setNewType]   = useState<string>('note');
+  const [colorDropdownOpen, setColorDropdownOpen] = useState(false);
 
   const { data: workspaces = [] } = useQuery({
     queryKey: ['workspaces'],
@@ -131,7 +151,11 @@ export default function DocSpace() {
     } else {
       const suffix = action.suffix ?? '';
       newContent = before + action.prefix + selected + suffix + after;
-      cursorPos  = start + action.prefix.length + selected.length + suffix.length;
+      if (selected.length === 0) {
+        cursorPos = start + action.prefix.length;
+      } else {
+        cursorPos = start + action.prefix.length + selected.length + suffix.length;
+      }
     }
 
     setEditContent(newContent);
@@ -306,6 +330,43 @@ export default function DocSpace() {
                       </button>
                     )
                   )}
+
+                  <div className="w-px h-5 bg-slate-200 dark:bg-slate-600 mx-1" />
+
+                  {/* Text Color Dropdown */}
+                  <div className="relative">
+                    <button onClick={() => setColorDropdownOpen(!colorDropdownOpen)} title="Text Color"
+                      className={`p-1.5 rounded hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors flex items-center gap-0.5 ${colorDropdownOpen ? 'bg-slate-200 dark:bg-slate-600 text-violet-600 dark:text-violet-400' : 'text-slate-600 dark:text-slate-300'}`}>
+                      <Palette size={14} />
+                    </button>
+                    {colorDropdownOpen && (
+                      <>
+                        <div className="fixed inset-0 z-10" onClick={() => setColorDropdownOpen(false)} />
+                        <div className="absolute left-0 mt-1 p-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg shadow-xl z-20 w-44">
+                          <p className="text-[10px] font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1 px-1">Text Color</p>
+                          <div className="grid grid-cols-5 gap-1.5">
+                            {COLORS.map((c) => (
+                              <button
+                                key={c.name}
+                                title={c.name}
+                                onClick={() => {
+                                  applyFormat({
+                                    icon: null,
+                                    label: c.name,
+                                    prefix: `<span style="color: ${c.hex}">`,
+                                    suffix: '</span>'
+                                  });
+                                  setColorDropdownOpen(false);
+                                }}
+                                className={`w-6 h-6 rounded-full cursor-pointer transition-transform hover:scale-110 active:scale-95 border border-black/10 dark:border-white/10 ${c.class}`}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      </>
+                    )}
+                  </div>
+
                   <span className="ml-auto text-xs text-slate-400 dark:text-slate-500 pr-1 hidden sm:block">
                     Ctrl+B Bold · Ctrl+I Italic · Ctrl+S Save
                   </span>

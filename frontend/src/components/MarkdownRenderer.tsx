@@ -1,5 +1,24 @@
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+
+function parseStyleString(styleStr: string | any): any {
+  if (!styleStr || typeof styleStr !== 'string') return styleStr;
+  const obj: any = {};
+  styleStr.split(';').forEach(rule => {
+    const parts = rule.split(':');
+    if (parts.length >= 2) {
+      const key = parts[0].trim();
+      const value = parts.slice(1).join(':').trim();
+      if (key && value) {
+        // camelCase the CSS property name (e.g., text-align -> textAlign)
+        const camelKey = key.replace(/-./g, x => x[1].toUpperCase());
+        obj[camelKey] = value;
+      }
+    }
+  });
+  return obj;
+}
 
 export default function MarkdownRenderer({ content }: { content: string }) {
   const components: any = {
@@ -64,10 +83,22 @@ export default function MarkdownRenderer({ content }: { content: string }) {
     td: ({ children }: any) => (
       <td className="px-4 py-2.5 text-slate-600 dark:text-slate-300 align-top">{children}</td>
     ),
+    span: ({ node, style, children, ...props }: any) => {
+      const parsedStyle = parseStyleString(style);
+      return <span style={parsedStyle} {...props}>{children}</span>;
+    },
+    div: ({ node, style, children, ...props }: any) => {
+      const parsedStyle = parseStyleString(style);
+      return <div style={parsedStyle} {...props}>{children}</div>;
+    },
   }
 
   return (
-    <ReactMarkdown remarkPlugins={[remarkGfm]} components={components}>
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw]}
+      components={components}
+    >
       {content}
     </ReactMarkdown>
   );

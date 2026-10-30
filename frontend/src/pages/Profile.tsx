@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { User, Lock, Mail, Shield, Calendar, CheckCircle, AlertCircle } from 'lucide-react';
 import Sidebar from '../components/Sidebar';
@@ -13,9 +13,16 @@ export default function Profile() {
   const [success, setSuccess]         = useState('');
   const [error, setError]             = useState('');
 
-  const { data: me, isLoading } = useQuery<UserProfile, Error, UserProfile>(['me'], () => apiGetMe().then(r => r.data), {
-    onSuccess: (d: UserProfile) => { if (!nameEditing) setNameForm(d.name); },
+  const { data: me, isLoading } = useQuery<UserProfile, Error>({
+    queryKey: ['me'],
+    queryFn: () => apiGetMe().then(r => r.data),
   });
+
+  useEffect(() => {
+    if (me && !nameEditing) {
+      setNameForm(me.name);
+    }
+  }, [me, nameEditing]);
 
   const flash = (msg: string, isError = false) => {
     isError ? setError(msg) : setSuccess(msg);

@@ -7,6 +7,10 @@ import {
   Layers, BarChart3, MessageSquare, Upload, Lightbulb,
 } from 'lucide-react'
 import GalaxyCanvas from '../components/GalaxyCanvas'
+import { isAuthenticated } from '../utils/auth'
+import Sidebar from '../components/Sidebar'
+import { useQuery } from '@tanstack/react-query'
+import { apiGetMe } from '../utils/api'
 
 // ── animated counter on scroll ────────────────────────────────────────────────
 function useCountUp(target: number, duration = 2000) {
@@ -89,7 +93,96 @@ const TESTIMONIALS = [
 ]
 
 // ─────────────────────────────────────────────────────────────────────────────
+function AuthenticatedHome() {
+  const { data: me } = useQuery({
+    queryKey: ['me'],
+    queryFn: () => apiGetMe().then(r => r.data),
+  });
+
+  return (
+    <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+      <Sidebar />
+      <main className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-900 overflow-y-auto">
+        
+        {/* Top Header Bar */}
+        <header className="flex items-center justify-between px-8 py-4 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
+          <div className="flex items-center gap-2">
+            <BookOpen className="text-violet-600" size={24} />
+            <span className="font-bold text-slate-800 dark:text-white text-lg">
+              ResearchHub <span className="text-violet-600">AI</span>
+            </span>
+          </div>
+          <div className="flex items-center gap-4">
+            <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+              Welcome, {me?.name || 'Researcher'}!
+            </span>
+            <Link to="/dashboard" className="flex items-center gap-1.5 bg-violet-600 hover:bg-violet-700 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors shadow-sm">
+              Go to Dashboard <ArrowRight size={14} />
+            </Link>
+            <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-700 pl-4">
+              <div className="w-9 h-9 rounded-full bg-violet-600 text-white flex items-center justify-center font-bold text-sm select-none">
+                {me?.name ? me.name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2) : 'RK'}
+              </div>
+              <div className="hidden md:block text-left">
+                <p className="text-xs font-semibold text-slate-700 dark:text-slate-200 leading-none">{me?.name || 'User'}</p>
+                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-0.5">{me?.email || 'user@gmail.com'}</p>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Hero Body Content */}
+        <div className="flex-1 flex flex-col justify-center items-center max-w-4xl mx-auto px-6 py-12 text-center w-full">
+          <h2 className="text-4xl md:text-5xl font-black text-slate-800 dark:text-white tracking-tight mb-4 leading-tight">
+            Your AI-Powered <span className="text-violet-600 dark:text-violet-400">Research Assistant</span>
+          </h2>
+          <p className="text-slate-500 dark:text-slate-400 text-sm md:text-base max-w-2xl mx-auto mb-8 leading-relaxed">
+            Accelerate your research with intelligent paper discovery, AI-powered insights, and collaborative document editing - all in one platform.
+          </p>
+          <div className="flex justify-center gap-4 mb-14">
+            <Link to="/search" className="bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm px-6 py-3 rounded-full shadow-md transition-all">
+              Start Researching
+            </Link>
+            <Link to="/docs" className="bg-white dark:bg-slate-800 border border-violet-600 dark:border-violet-500 text-violet-600 dark:text-violet-400 font-bold text-sm px-6 py-3 rounded-full hover:bg-slate-50 dark:hover:bg-slate-700 transition-all">
+              Try DocSpace
+            </Link>
+          </div>
+
+          {/* Features Navigation Section */}
+          <div className="border-t border-slate-200/60 dark:border-slate-700/60 pt-10 w-full max-w-2xl">
+            <h3 className="text-sm font-bold text-slate-800 dark:text-white mb-6 uppercase tracking-wider">
+              Powerful Features for Modern Research
+            </h3>
+            <div className="grid grid-cols-4 gap-4">
+              {[
+                { to: '/search', label: 'Search Papers', icon: Search },
+                { to: '/chat',   label: 'RAG Chat',       icon: MessageSquare },
+                { to: '/docs',   label: 'Doc Space',     icon: FileText },
+                { to: '/dashboard', label: 'Dashboard',   icon: BookOpen },
+              ].map(({ to, label, icon: Icon }) => (
+                <Link key={to} to={to} className="flex flex-col items-center gap-2 group">
+                  <div className="w-12 h-12 rounded-full bg-violet-50 dark:bg-violet-900/30 border border-violet-100 dark:border-violet-800 flex items-center justify-center text-violet-600 dark:text-violet-400 transition-all group-hover:scale-110 group-hover:bg-violet-100 dark:group-hover:bg-violet-900/50 shadow-sm">
+                    <Icon size={20} />
+                  </div>
+                  <span className="text-[11px] font-semibold text-slate-600 dark:text-slate-300 group-hover:text-violet-600 dark:group-hover:text-violet-400 transition-colors">
+                    {label}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  );
+}
+
 export default function Home() {
+  if (isAuthenticated()) {
+    return <AuthenticatedHome />;
+  }
+
   const [mouse, setMouse]           = useState({ x: 0, y: 0 })
   const [navScrolled, setNavScrolled] = useState(false)
   const heroRef = useRef<HTMLDivElement>(null)

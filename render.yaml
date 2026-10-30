@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: research-hub-ai-backend
+    env: docker
+    dockerfilePath: Dockerfile.backend
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: EMBEDDING_MODEL
+        value: all-MiniLM-L6-v2
+      - key: FAISS_INDEX_DIR
+        value: ./faiss_indexes
+      - key: UPLOAD_DIR
+        value: ./uploads
+

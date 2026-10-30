@@ -55,8 +55,9 @@ export interface DocumentUpdate { title?: string; content?: string }
 // Axios instance                                                       //
 // ------------------------------------------------------------------ //
 
+const rawBaseUrl = import.meta.env.VITE_API_URL ?? '';
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? '',
+  baseURL: rawBaseUrl.endsWith('/') ? rawBaseUrl.slice(0, -1) : rawBaseUrl,
 });
 
 api.interceptors.request.use((config) => {
