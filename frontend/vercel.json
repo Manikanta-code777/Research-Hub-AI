@@ -4,9 +4,36 @@
   "outputDirectory": "dist",
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/auth/:path*",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/auth/:path*"
+    },
+    {
+      "source": "/workspaces/:path*",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/workspaces/:path*"
+    },
+    {
+      "source": "/papers/:path*",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/papers/:path*"
+    },
+    {
+      "source": "/search/:path*",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/search/:path*"
+    },
+    {
+      "source": "/chat/:path*",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/chat/:path*"
+    },
+    {
+      "source": "/documents/:path*",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/documents/:path*"
+    },
+    {
+      "source": "/health",
+      "destination": "https://wav-tutorials-instrumental-leave.trycloudflare.com/health"
+    },
+    {
+      "source": "/((?!assets/|favicon\\.svg|.*\\.).*)",
       "destination": "/index.html"
     }
   ]
 }
-
